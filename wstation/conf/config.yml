@@ -33,7 +33,26 @@
         - nmap
         - etcd
         - ntp
+        - git
+        - lynx
     - debug:
       msg: "Output=>{{installOutput}}"
+    - name: Disable Firewall
+      systemd:
+        name: firewalld
+        enabled: no
+        state: stopped
+      register: output
+    - debug: msg="Output=>{{output}}"
+    - name: Replace SELINUX=disabled 
+      replace:
+        dest: /etc/selinux/config
+        regexp: '^SELINUX=.*$'
+        replace: 'SELINUX=disabled'
+        validate: "grep 'SELINUX=disabled' %s" 
+    - name: Reboot
+      shell: "reboot now"
+      when:  reboot is defined     
+    
 ...
   
