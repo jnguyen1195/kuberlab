@@ -1,17 +1,19 @@
-versionApi: extensions/v1beta
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-   name: nginx-dep
+   name: nginx-deployment
+   labels:
+     app: nginxDD   
 spec:
 # only run one template 
   replicas: 1
   template:
     metadata:
       labels:
-      app: nginx-dep
-    spec 
+          app: nginx
+    spec: 
       containers:
        - name: nginx
          image: nginx:1.7.9
          ports:
-           - containerPorts: 80
+           - containerPort: 80
