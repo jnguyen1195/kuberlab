@@ -1,0 +1,33 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: yes
+  vars:
+    - publickey: "{{lookup('env', 'HOME')}}/.ssh/id_rsa.pub"
+  tasks:
+    - name: Export sshkey
+      copy:
+        src:  "{{publickey}}"
+        dest: /home/vagrant/.ssh/authorized_keys
+        owner: vagrant
+        group: vagrant
+        mode: 0600
+      register: installOutput
+    - debug:
+      msg: "Output=>{{installOutput}}"
+    - name: Update host
+      lineinfile:
+        dest=/etc/hosts
+        regexp='.*{{item}}$'
+        line='{{hostvars[item].ansible_host}} {{item}}'
+        state=present
+      when: hostvars[item].ansible_default_ipv4.address is defined 
+      with_items: "{{groups['all']}}"
+      register: installOutput   
+    - debug:
+      msg: "Output=>{{installOutput}}; {{groups['all']}}"
+    - name: Cat /etc/hosts
+      shell: "cat /etc/hosts"
+      register: installOutput
+    - debug:
+      msg: "Hosts=>{{installOutput}}"

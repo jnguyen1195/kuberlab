@@ -1,0 +1,26 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: yes
+  gather_facts: true
+  tasks:
+    - name: check for updates (yum)
+      yum: list=update update_cache=true
+      register: yumoutput
+    - debug: msg="{{yumoutput}}"
+    - name: Clean up 
+      shell: "yum-complete-transaction --cleanup-only"
+      register: yumoutput
+    - debug: msg="{{yumoutput}}"
+    - name: Install packages
+      yum: name="{{ item }}" state=present
+      register: installOutput
+      with_items:
+        - kubernetes
+        - docker
+        - emacs-nox
+        - nmap
+    - debug:
+      msg: "Output=>{{installOutput}}"
+...
+  
