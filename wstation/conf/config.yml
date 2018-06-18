@@ -3,7 +3,18 @@
   remote_user: vagrant
   become: yes
   gather_facts: true
+  vars:
+    - repo: "etc/yum.repos.d/virt7-docker-common-release.repo"
   tasks:
+    - name: copy kubernetes config 
+      template:
+         src: "{{repo}}"
+         dest: "/{{repo}}"
+         owner: root
+         group: root
+         mode: 0644
+      register: output
+    - debug: msg="{{output}}"
     - name: check for updates (yum)
       yum: list=update update_cache=true
       register: yumoutput
@@ -20,6 +31,8 @@
         - docker
         - emacs-nox
         - nmap
+        - etcd
+        - ntp
     - debug:
       msg: "Output=>{{installOutput}}"
 ...

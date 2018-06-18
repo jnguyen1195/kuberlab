@@ -1,0 +1,50 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: yes
+  gather_facts: true
+  vars:
+     - master: "{{groups['master'][0]}}"
+  tasks:
+    - name: Stop all kubernetes services and dockers
+      shell: "systemctl stop etcd kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy docker"
+      register: output
+    - debug: msg="{{output}}"
+    - name: copy kubernetes config 
+      template:
+         src: "etc/kubernetes/{{item}}.j2"
+         dest: "/etc/kubernetes/{{item}}"
+         owner: root
+         group: root
+         mode: 0644
+      register: output
+      with_items:
+        - apiserver
+        - config
+        - kubelet
+    - debug: msg="{{output}}"
+    - name: copy etcd config 
+      template:
+         src: "etc/etcd/{{item}}.j2"
+         dest: "/etc/etcd/{{item}}"
+         owner: root
+         group: root
+         mode: 0644
+      with_items:
+        - etcd.conf
+      register: output
+    - debug: msg="{{output}}"
+    - name: Start all kubernetes services for master
+      shell: "systemctl start etcd kube-apiserver kube-controller-manager kube-scheduler "
+      when: ansible_hostname=="{{master}}"
+      register: output
+    - debug: msg="{{output}}"
+    - name: Start all kubernetes services and docker for nodes
+      shell: "sleep 10;systemctl start docker kubelet kube-proxy"
+      when: ansible_hostname!="{{master}}"
+      register: output
+    - debug: msg="{{output}}"
+
+
+...
+  
