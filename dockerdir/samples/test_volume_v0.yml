@@ -1,0 +1,10 @@
+
+
+pg:
+    image: postgres:9.4
+    volumes:
+      - mydata:/var/lib/postgresql
+frontend:
+    image: nginx
+    links:
+      - pg
