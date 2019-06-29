@@ -14,6 +14,11 @@
         mode: 0600
       register: installOutput
     - debug:
+        msg: "groups= {{groups['all']}}"
+    - debug:
+        msg: "hosts= {{hostvars['all']}}"
+
+    - debug:
       msg: "Output=>{{installOutput}}"
     - name: Update host
       lineinfile:
@@ -21,9 +26,10 @@
         regexp='.*{{item}}$'
         line='{{hostvars[item].ansible_host}} {{item}}'
         state=present
-      when: hostvars[item].ansible_host is defined 
+      #when: hostvars[item].ansible_host is defined 
       with_items: "{{groups['all']}}"
-      register: installOutput   
+      register: installOutput
+      
     - debug:
       msg: "Output=>{{installOutput}}; {{groups['all']}}"
     - name: Cat /etc/hosts
